@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/default_layout}">
+<!-- layout Content -->
+<th:block layout:fragment="content">
+    <div class="container-fluid">
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-dark font-weight-bold">Board Detail</h1>
+        </div>
+        <div class="row">
+            <div class="col-lg-7">
+                <form id="frmBoardDetail" method="post" enctype="multipart/form-data">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <div class="p-0" th:if="${resultMap != null}">
+                        <input type="hidden" th:name="id" th:value="${resultMap.info.id}"/>
+                        <input type="hidden" th:name="idArr" th:value="${resultMap.info.id}"/>
+                        <div class="form-group row">
+                            <div class="col-sm-6">
+                                <p class="text-dark font-weight-bold">*Type.</p>
+                                <div class="text-dark">
+                                    <select class="custom-select" name="type" onchange="fnChgType(this);">
+                                        <option value="NOTICE" th:selected="${resultMap.info.type == 'NOTICE'}">Notice</option>
+                                        <option value="FAQ" th:selected="${resultMap.info.type == 'FAQ'}">FAQ</option>
+                                        <option value="VIDEO" th:selected="${resultMap.info.type == 'VIDEO'}">Video</option>
+                                        <option value="NEWS" th:selected="${resultMap.info.type == 'NEWS'}">News</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <p class="text-dark font-weight-bold">Read Count.</p>
+                                <div class="p-2 text-dark" th:text="${resultMap.info.readCnt}"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <p class="text-dark font-weight-bold">*Use period.</p>
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">
+                                    <i class="fa fa-calendar"></i>
+                                </span>
+                                <input type="text" class="form-control col-sm-3" id="strDatePicker" name="startDate" th:value="${resultMap.info.startDate}" readonly>
+                                <span class="text-dark font-weight-bold">&nbsp;~&nbsp;</span>
+                                <span class="input-group-text">
+                                    <i class="fa fa-calendar"></i>
+                                </span>
+                                <input type="text" class="form-control col-sm-3" id="endDatePicker" name="endDate" th:value="${resultMap.info.endDate}" readonly>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="Y" id="flexCheckDefault" name="allTimeYn"
+                                       th:checked="${resultMap.info.allTimeYn == 'Y'}">
+                                <label class="form-check-label text-dark font-weight-bold" for="flexCheckDefault">Check for All Time Use.</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <p class="text-dark font-weight-bold">*Title.</p>
+                            <input class="form-control" type="text" name="title" th:value="${resultMap.info.title}" maxlength="100" required>
+                        </div>
+                        <div class="form-group">
+                            <p class="text-dark font-weight-bold">*Contents.</p>
+                            <textarea class="form-control" rows="10" name="contents" th:text="${resultMap.info.contents}" maxlength="3000" required></textarea>
+                        </div>
+                        <div class="form-group" id="videoDiv" th:style="${resultMap.info.type == 'VIDEO' ? 'display:block;' : 'display:none;'}">
+                            <p class="text-dark font-weight-bold">*Video URL. (https://www.youtube.com/embed/<span class="text-danger">code</span>)</p>
+                            <input class="form-control" type="text" name="videoUrl" th:value="${resultMap.info.videoUrl}" maxlength="150">
+                            <br/>
+                            <iframe id="player" type="text/html" width="665" height="360"
+                                    th:src="'https://www.youtube.com/embed/' + ${resultMap.info.videoUrl}"
+                                    frameborder="0"></iframe>
+                        </div>
+                        <hr>
+                        <p class="text-dark font-weight-bold">File Upload. <span class="text-secondary">(Maximum 3 of uploads)</span></p>
+                        <p class="text-dark font-weight-bold">Possible Extensions <span class="text-secondary">("jpg","jpeg","png")</span></p>
+                        <div class="p-1" id="divFile">
+                            <div class="form-row custom-file-row" id="divFileChild">
+                                <div class="form-group col-md-8 custom-file">
+                                    <input type="file" class="custom-file-input" id="fileId" name="fileId" onchange="fnChgFile(this);">
+                                    <label class="custom-file-label" for="fileId">Choose file</label>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <button class="btn btn-primary" type="button" onclick="fnAddFileForm();">
+                                        <i class="fas fa-plus fa-sm"></i>
+                                    </button>
+                                    <button class="btn btn-primary" type="button" onclick="fnDelFileForm();">
+                                        <i class="fas fa-minus fa-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                         </div>
+                        <div class="text-dark font-weight-bold fileListDiv" th:each="fileList : ${resultMap.fileList}">
+                            Download: <a th:href="@{/file/download(id=${fileList.id})}" th:text="${fileList.fileName}" target="_blank"></a>
+                            <a href="javascript:" onclick="fnDelFile(this);" class="btn btn-circle btn-sm" th:data-file-id="${fileList.id}">
+                                <i class="fa fa-window-close"></i>
+                            </a>
+                        </div>
+                        <hr>
+                        <div class="form-group row">
+                            <div class="col-sm-6">
+                                <p class="text-primary font-weight-bold">Register.</p>
+                                <div class="p-2 text-dark" th:text="${resultMap.info.registerName}"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <p class="text-primary font-weight-bold">Register Time.</p>
+                                <div class="p-2 text-dark" th:text="${resultMap.info.registerTime}"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-6">
+                                <p class="text-primary font-weight-bold">Modify Reg.</p>
+                                <div class="p-2 text-dark" th:text="${resultMap.info.modifyName}"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <p class="text-primary font-weight-bold">Modify Time.</p>
+                                <div class="p-2 text-dark" th:text="${resultMap.info.modifyTime}"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <a class="btn btn-success btn-user btn-lg" href="/board-list">Previous</a>
+                            <button class="btn btn-info btn-user btn-lg" type="submit">Modify</button>
+                            <button class="btn btn-danger btn-user btn-lg float-right" type="button" onclick="fnDelBoard();">Delete</button>
+                        </div>
+                    </div>
+                    <!-- ------------------------- Write Start ------------------------ -->
+                    <!-- ------------------------- Write Start ------------------------- -->
+                    <div class="p-0" th:unless="${resultMap != null}">
+                        <div class="form-group">
+                            <p class="text-dark font-weight-bold">*Type.</p>
+                            <div class="text-dark">
+                                <select class="custom-select" name="type" onchange="fnChgType(this);">
+                                    <option value="NOTICE">Notice</option>
+                                    <option value="FAQ">FAQ</option>
+                                    <option value="VIDEO">Video</option>
+                                    <option value="NEWS">News</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <p class="text-dark font-weight-bold">*Use period.</p>
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">
+                                    <i class="fa fa-calendar"></i>
+                                </span>
+                                <input type="text" class="form-control col-sm-3" id="strDatePicker" name="startDate" readonly>
+                                <span class="text-dark font-weight-bold">&nbsp;&nbsp;~&nbsp;&nbsp;</span>
+                                <span class="input-group-text">
+                                    <i class="fa fa-calendar"></i>
+                                </span>
+                                <input type="text" class="form-control col-sm-3" id="endDatePicker" name="endDate" readonly>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="Y" id="flexCheckDefault" name="allTimeYn">
+                                <label class="form-check-label text-dark font-weight-bold" for="flexCheckDefault">Check for All Time Use.</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <p class="text-dark font-weight-bold">*Title.</p>
+                            <input class="form-control" type="text" name="title" maxlength="100" required>
+                        </div>
+                        <div class="form-group">
+                            <p class="text-dark font-weight-bold">*Contents.</p>
+                            <textarea class="form-control" rows="5" name="contents" maxlength="3000" required></textarea>
+                        </div>
+                        <div class="form-group" id="videoDiv" style="display:none;">
+                            <p class="text-dark font-weight-bold">*Video URL.</p>
+                            <input class="form-control" type="text" name="videoUrl" maxlength="150">
+                        </div>
+                        <p class="text-dark font-weight-bold">File Upload. <span class="text-secondary">(Maximum 3 of uploads.)</span></p>
+                        <p class="text-dark font-weight-bold">Possible Extensions <span class="text-secondary">("jpg","jpeg","png")</span></p>
+                        <div class="p-1" id="divFile">
+                            <div class="form-row custom-file-row" id="divFileChild">
+                                <div class="form-group col-md-8 custom-file">
+                                    <input type="file" class="custom-file-input" id="fileId" name="fileId" onchange="fnChgFile(this);">
+                                    <label class="custom-file-label" for="fileId">Choose file</label>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <button class="btn btn-primary" type="button" onclick="fnAddFileForm();">
+                                        <i class="fas fa-plus fa-sm"></i>
+                                    </button>
+                                    <button class="btn btn-primary" type="button" onclick="fnDelFileForm();">
+                                        <i class="fas fa-minus fa-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <a class="btn btn-success btn-user btn-lg" href="/board-list">Previous</a>
+                            <button class="btn btn-info btn-user btn-lg" type="submit">Register</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script th:inline="javascript">
+        let frm = $("#frmBoardDetail");
+        let divFile = $("#divFile");
+        let divFileHtml = $("#divFileChild");
+        let fileMaxLen = 3, fileMaxSize = 10485760, fileAllowExt = ["jpg","jpeg","png"];
+        let fileIdArr = [];
+        let deleteFlag = false;
+
+        datepicker_util.init();
+
+        let fnChgType = function(obj) {
+            let type = $(obj).val();
+            if (type == "VIDEO") {
+                $("#videoDiv").show();
+                $("input[name='videoUrl'").attr("required", true);
+            } else {
+                $("#videoDiv").hide();
+                $("input[name='videoUrl'").attr("required", false);
+            }
+        };
+
+        let fnChgFile = function(obj) {
+            let fileObj  = $(obj)[0];
+            let fileVal	= fileObj.files[0].name;
+            let fileSize = fileObj.files[0].size;
+            let fileExt	= fileVal.substring(fileVal.lastIndexOf(".") + 1, fileVal.length);
+            let flag = true;
+
+            if (fileAllowExt.indexOf(fileExt.toLowerCase()) < 0) {
+                alert("It is not a registrable extension.");
+            } else if (fileSize > fileMaxSize) {
+                alert("Attachments can be registered up to 10MB.");
+            } else if (($(".custom-file-row").length + $(".fileListDiv").length) > 3) {
+                alert("Attachments can be registered up to 3 number.");
+            } else {
+                flag = false;
+                $(obj).next("label").text(fileVal);
+            }
+
+            if (flag) {
+                $(obj).val("");
+                $(obj).next("label").text("Choose file");
+            }
+        };
+
+        let fnAddFileForm = function() {
+            let fileFormLen = Number($(".custom-file-row").length) + Number($(".fileListDiv").length);
+
+            if (fileFormLen >= fileMaxLen) {
+                alert("Maximum uploads file.");
+                return false;
+            }
+
+            let cloneFileHtml = divFileHtml.clone();
+
+            cloneFileHtml.find("input").val("");
+            cloneFileHtml.find("label").text("Choose file");
+            cloneFileHtml.find("label").attr("for", "fileId" + fileFormLen);
+            cloneFileHtml.find("input").attr("id", "fileId" + fileFormLen);
+            cloneFileHtml.find("input").attr("name", "fileId" + fileFormLen);
+
+            $("#divFile").append(cloneFileHtml);
+        };
+
+        let fnDelFileForm = function() {
+            if ($(".custom-file-row").length <= 1) {
+                alert("Can't Delete any more file.");
+                return false;
+            }
+            $(".custom-file-row")[$(".custom-file-row").length - 1].remove();
+        };
+
+        let fnDelFile = function(obj) {
+            if (confirm("Do you want to file delete it?")) {
+                $(obj).parents(".fileListDiv").remove();
+                fileIdArr.push($(obj).data("fileId"));
+            }
+        };
+
+        let fnDelBoard = function() {
+            if (confirm("Do you want to delete it?")) {
+                deleteFlag = true;
+                frm.attr("action","/board-delete");
+                frm.attr("method","post");
+                frm.submit();
+            }
+        }
+
+        frm.submit(function() {
+            let info = [[${resultMap}]];
+            let flag = false;
+            let msg = "Are you sure you want to register?";
+
+            if (deleteFlag) {
+                return true;
+            }
+
+            if (info != null && info != '') {
+                frm.attr("action", "/board-update");
+                msg = "Are you sure you want to modify?";
+            } else {
+                frm.attr("action", "/board-save");
+            }
+
+            if (confirm(msg)) {
+                if (fileIdArr.length > 0) {
+                    let data = {
+                        [[${_csrf.parameterName}]]: [[${_csrf.token}]],
+                        fileIdArr: fileIdArr,
+                        useYn: 'N'
+                    };
+                    script.ajax("/file-update/useYn", "post", false, "json", data, function(r) {
+                        if (r.result > 0) {
+                            flag = true;
+                        }
+                    });
+                } else {
+                    flag = true;
+                }
+            }
+
+            return flag;
+        });
+    </script>
+</th:block>
+</html>

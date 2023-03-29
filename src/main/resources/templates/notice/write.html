@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/default_layout}">
+<th:block layout:fragment="content">
+  <section class="table-components">
+    <div class="container-fluid">
+      <div class="title-wrapper pt-30">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <div class="title mb-30">
+              <h2 class="ft-gm" th:if="${resultMap != null}">공지사항 상세</h2>
+              <h2 class="ft-gm" th:unless="${resultMap != null}">공지사항 등록</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-elements-wrapper">
+        <form id="frmWrite" action="/notice/save" method="post" enctype="multipart/form-data">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <input type="hidden" th:name="id" th:value="${resultMap.info.id}" th:if="${resultMap != null}"/>
+          <input type="hidden" th:name="idArr" th:value="${resultMap.info.id}" th:if="${resultMap != null}"/>
+          <div class="col-lg-12">
+            <div class="card-style mb-30">
+              <h4 class="mb-25 ft-gm">등록정보</h4>
+              <label class="text-dark ft-gm"><span class="text-danger">*</span>구분</label>
+              <div class="select-style-1 mt-1">
+                <div class="select-position">
+                  <select name="type" th:if="${resultMap == null}">
+                    <option value="SERVICE">서비스</option>
+                    <option value="CHECK">점검</option>
+                  </select>
+                  <select name="type" th:unless="${resultMap == null}">
+                    <option value="SERVICE" th:selected="${resultMap.info.type eq 'SERVICE'}">서비스</option>
+                    <option value="CHECK" th:selected="${resultMap.info.type eq 'CHECK'}">점검</option>
+                  </select>
+                </div>
+              </div>
+              <label class="text-dark ft-gm"><span class="text-danger">*</span>제목</label>
+              <div class="input-style-3 mt-1">
+                <input type="text" name="title" maxlength="50" th:if="${resultMap == null}" required/>
+                <input type="text" name="title" maxlength="50" th:unless="${resultMap == null}" th:value="${resultMap.info.title}" required/>
+                <span class="icon"> <i class="lni lni-comments"></i> </span>
+              </div>
+              <label class="text-dark ft-gm"><span class="text-danger">*</span>내용</label>
+              <div class="input-style-3 mt-1">
+                <textarea rows="7" name="contents" th:if="${resultMap == null}" required></textarea>
+                <textarea rows="7" name="contents" th:unless="${resultMap == null}" th:text="${resultMap.info.contents}" required></textarea>
+                <span class="icon"><i class="lni lni-text-format"></i></span>
+              </div>
+              <div class="row">
+                <div class="col-lg-12" id="fileDiv">
+                  <label class="text-dark ft-gm">첨부파일</label>&nbsp;
+                  <a href="javascript:fnAddFileDiv();" class="primary-btn rounded-md fw-bold">
+                    &nbsp;&nbsp;&nbsp;<i class="lni lni-add-files"></i> 추가&nbsp;&nbsp;&nbsp;&nbsp;
+                  </a>
+                  <a href="javascript:fnDeleteFileDiv();" class="danger-btn rounded-md fw-bold">
+                    &nbsp;&nbsp;&nbsp;<i class="lni lni-remove-file"></i> 삭제&nbsp;&nbsp;&nbsp;&nbsp;
+                  </a>
+                  <th:block th:if="${resultMap != null}">
+                    <th:block th:if="${resultMap.fileList != null}">
+                      <input type="hidden" id="fileListSize" th:value="${resultMap.fileList.size()}">
+                      <div class="mt-3" th:each="list, status : ${resultMap.fileList}">
+                      <a th:href="@{/file/download(id=${list.id})}" th:text="${list.realFileName}" target="_blank"></a>&nbsp;
+                      <span class="icon" style="cursor:pointer" th:onclick="fnDeleteFile(this, [[${list.id}]])">
+                        <i class="lni lni-close"></i>
+                      </span>
+                    </div>
+                    </th:block>
+                  </th:block>
+                  <div class="input-style-3 mt-3" id="attachFileDiv">
+                    <input type="file" name="file" onchange="fnChangeFile(this)" />
+                    <span class="icon"> <i class="lni lni-cloud-upload"></i> </span>
+                  </div>
+                </div>
+              </div>
+              <div class="row mt-3">
+                <div class="col-lg-3">
+                  <label class="text-dark ft-gm"><span class="text-danger">*</span>상단여부</label>
+                  <div class="form-check form-switch toggle-switch mt-1">
+                    <input class="form-check-input" type="checkbox" name="topYn" value="Y" th:if="${resultMap == null}">
+                    <input class="form-check-input" type="checkbox" name="topYn" value="Y" th:unless="${resultMap == null}" th:checked="${resultMap.info.topYn eq 'Y'}">
+                    <label class="form-check-label">미노출 / 노출</label>
+                  </div>
+                </div>
+                <div class="col-lg-3">
+                  <label class="text-dark ft-gm"><span class="text-danger">*</span>사용여부</label>
+                  <div class="form-check form-switch toggle-switch mt-1">
+                    <input class="form-check-input" type="checkbox" name="useYn" value="Y" th:if="${resultMap == null}">
+                    <input class="form-check-input" type="checkbox" name="useYn" value="Y" th:unless="${resultMap == null}" th:checked="${resultMap.info.useYn eq 'Y'}">
+                    <label class="form-check-label">미사용 / 사용</label>
+                  </div>
+                </div>
+              </div>
+              <th:block th:if="${resultMap != null}">
+                <br/><hr/><br/>
+                <div class="row">
+                  <div class="col-lg-6">
+                    <label class="text-dark ft-gm">등록자</label>
+                    <div class="input-style-3">
+                      <input type="text" th:value="${resultMap.info.registerName}" disabled/>
+                      <span class="icon"> <i class="lni lni-laptop-phone"></i> </span>
+                    </div>
+                  </div>
+                  <div class="col-lg-6">
+                    <label class="text-dark ft-gm">등록일시</label>
+                    <div class="input-style-3">
+                      <input type="text" th:value="${resultMap.info.registerTime}" disabled/>
+                      <span class="icon"> <i class="lni lni-timer"></i> </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-6">
+                    <label class="text-dark ft-gm">변경자</label>
+                    <div class="input-style-3">
+                      <input type="text" th:value="${resultMap.info.modifyName}" disabled/>
+                      <span class="icon"> <i class="lni lni-laptop-phone"></i> </span>
+                    </div>
+                  </div>
+                  <div class="col-lg-6">
+                    <label class="text-dark ft-gm">변경일시</label>
+                    <div class="input-style-3">
+                      <input type="text" th:value="${resultMap.info.modifyTime}" disabled/>
+                      <span class="icon"> <i class="lni lni-timer"></i> </span>
+                    </div>
+                  </div>
+                </div>
+              </th:block>
+            </div>
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="float-start">
+                  <a href="/notice/list" class="main-btn success-btn rounded-md btn-hover fw-bold">
+                    <i class="lni lni-list"></i> 목록
+                  </a>
+                </div>
+                <div class="float-end">
+                  <Button type="submit" class="main-btn secondary-btn rounded-md btn-hover fw-bold">
+                    <i class="lni lni-pencil-alt"></i>
+                    <span th:if="${resultMap == null}">등록</span>
+                    <span th:unless="${resultMap == null}">수정</span>
+                  </Button>
+                  <a href="javascript:fnDelete();" class="main-btn danger-btn rounded-md btn-hover fw-bold" th:if="${resultMap != null}">
+                    <i class="lni lni-trash-can"></i> 삭제
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+  <script th:inline="javascript">
+    const frm = $("#frmWrite");
+    const resultMap = [[${resultMap}]];
+    const attachFileDiv = $("#attachFileDiv");
+    let deleteFlag = false;
+    let fileListSize = Number($("#fileListSize").val() ? $("#fileListSize").val() : 0);
+
+    if (fileListSize > 2) {
+      attachFileDiv.hide();
+    }
+
+    function fnChangeFile(obj) {
+      fileUtil.change(obj, "");
+    }
+
+    function fnDelete() {
+      if (confirm(msg.confirm.delete)) {
+        deleteFlag = true;
+        frm.attr("action", "/notice/delete");
+        frm.submit();
+      }
+    }
+
+    function fnAddFileDiv() {
+      let fileDivLen = Number($("#fileDiv").find("input[name='file']").length);
+      let fileListSize = Number($("#fileListSize").val() ? $("#fileListSize").val() : 0);
+
+      if ((fileDivLen+fileListSize) > 2) {
+        alert(msg.file.max);
+        return false;
+      }
+
+      const attachFileDivClone = attachFileDiv.clone();
+      attachFileDivClone.find("input").val("");
+      attachFileDivClone.attr("id", attachFileDivClone.attr("id") + fileDivLen);
+      $("#fileDiv").append(attachFileDivClone);
+    }
+
+    function fnDeleteFileDiv() {
+      let fileLen = Number($("#fileDiv").find("input[name='file']").length);
+      let fileListSize = Number($("#fileListSize").val() ? $("#fileListSize").val() : 0);
+
+      if ((fileLen - fileListSize) == 0) {
+        alert(msg.file.min);
+        return false;
+      }
+
+      $("#attachFileDiv" + (fileLen-1)).remove();
+    }
+
+    function fnDeleteFile(obj, id) {
+      if(confirm(msg.confirm.deleteFile)) {
+        let data = {
+          [[${_csrf.parameterName}]]: [[${_csrf.token}]],
+          id: id,
+          useYn: "N"
+        }
+        script.ajax("/file/update-use", "post", false, "json", data, function(r) {
+          if (r.result > 0) {
+            if (fileListSize == 3) {
+              attachFileDiv.show();
+            }
+            $(obj).parent("div").remove();
+            alert(msg.delete);
+          }
+        });
+      }
+    }
+
+    frm.submit(function() {
+      if (deleteFlag) {
+        return true;
+      }
+      if (resultMap) {
+        if (confirm(msg.confirm.modify)) {
+          frm.attr("action", "/notice/update");
+          return true;
+        }
+      } else {
+        if (confirm(msg.confirm.register)) {
+          return true;
+        }
+      }
+      return false;
+    });
+  </script>
+</th:block>
+</html>

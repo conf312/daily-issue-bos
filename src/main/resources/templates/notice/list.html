@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/default_layout}">
+<th:block layout:fragment="content">
+  <section class="table-components">
+    <div class="container-fluid">
+      <div class="title-wrapper pt-30">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <div class="title mb-30">
+              <h2 class="ft-gm">공지사항 목록</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tables-wrapper">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="card-style mb-30">
+              <h6 class="mb-25">검색</h6>
+              <form id="frm" action="/notice/list">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <div class="row">
+                  <div class="col-lg-3">
+                    <div class="select-style-1">
+                      <label class="fw-bold">구분</label>
+                      <div class="select-position">
+                        <select id="type" name="type">
+                          <option value="" th:selected="${resultMap.request.type eq ''}">전체</option>
+                          <option value="SERVICE" th:selected="${resultMap.request.type eq 'SERVICE'}">서비스</option>
+                          <option value="CHECK" th:selected="${resultMap.request.type eq 'CHECK'}">점검</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-3">
+                    <div class="select-style-1">
+                      <label class="fw-bold">상단여부</label>
+                      <div class="select-position">
+                        <select id="topYn" name="topYn">
+                          <option value="" th:selected="${resultMap.request.topYn eq ''}">전체</option>
+                          <option value="Y" th:selected="${resultMap.request.topYn eq 'Y'}">노출</option>
+                          <option value="N" th:selected="${resultMap.request.topYn eq 'N'}">미노출</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-3">
+                    <div class="select-style-1">
+                      <label class="fw-bold">사용여부</label>
+                      <div class="select-position">
+                        <select id="useYn" name="useYn">
+                          <option value="" th:selected="${resultMap.request.useYn eq ''}">전체</option>
+                          <option value="Y" th:selected="${resultMap.request.useYn eq 'Y'}">사용</option>
+                          <option value="N" th:selected="${resultMap.request.useYn eq 'N'}">미사용</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-5">
+                    <div class="input-style-1">
+                      <label class="fw-bold">검색어</label>
+                      <input type="text" placeholder="제목, 내용을 입력해주세요." id="search" name="search" th:value="${resultMap.request.search}">
+                    </div>
+                  </div>
+                  <div class="col-lg-5" style="margin-top:8px">
+                    <div class="mt-4">
+                      <a href="javascript:frm.submit();" class="main-btn primary-btn rounded-md btn-hover fw-bold">
+                        <i class="lni lni-search-alt"></i> 검색
+                      </a>
+                      <a href="/notice/list" class="main-btn success-btn rounded-md btn-hover fw-bold">
+                        <i class="lni lni-reload"></i> 초기화
+                      </a>
+                    </div>
+                  </div>
+                  <div class="col-lg-5">
+                    <div>
+                      <a href="javascript:fnDelete();" class="main-btn danger-btn rounded-md btn-hover fw-bold">
+                        <i class="lni lni-trash-can"></i> 삭제
+                      </a>
+                      <a href="/notice/write" class="main-btn secondary-btn rounded-md btn-hover fw-bold">
+                        <i class="lni lni-pencil-alt"></i> 등록
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div class="table-wrapper table-responsive mt-4">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>&nbsp;&nbsp;<input class="form-check-input" type="checkbox" name="idArrAll"></th>
+                      <th><h5>번호</h5></th>
+                      <th><h5>구분</h5></th>
+                      <th><h5>제목</h5></th>
+                      <th><h5>상단여부</h5></th>
+                      <th><h5>사용여부</h5></th>
+                      <th><h5>조회수</h5></th>
+                      <th><h5>등록일</h5></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  <th:block th:if="${resultMap.list.size() > 0}">
+                    <tr th:each="list, status : ${resultMap.list}">
+                      <td class="min-width">
+                        <input class="form-check-input" type="checkbox" th:value="${list.id}" name="idArr">
+                      </td>
+                      <td class="min-width">
+                        <p th:text="${(resultMap.totalCnt - status.index) - (resultMap.pageSize * (resultMap.page / resultMap.pageSize))}"></p>
+                      </td>
+                      <td class="min-width">
+                        <p th:if="${list.type eq 'SERVICE'}">서비스</p>
+                        <p th:if="${list.type eq 'CHECK'}">점검</p>
+                      </td>
+                      <td class="min-width">
+                        <p>
+                          <a class="text-primary" th:href="@{/notice/write(id=${list.id})}" th:text="${list.title}"></a>
+                        </p>
+                      </td>
+                      <td class="min-width">
+                        <span class="status-btn active-btn" th:if="${list.topYn eq 'Y'}">노출</span>
+                        <span class="status-btn close-btn" th:unless="${list.topYn eq 'Y'}">미노출</span>
+                      </td>
+                      <td class="min-width">
+                        <span class="status-btn active-btn" th:if="${list.useYn eq 'Y'}">사용</span>
+                        <span class="status-btn close-btn" th:unless="${list.useYn eq 'Y'}">미사용</span>
+                      </td>
+                      <td class="min-width">
+                        <p th:text="${list.readCnt}"></p>
+                      </td>
+                      <td class="min-width">
+                        <p th:text="${list.registerTime}"></p>
+                      </td>
+                    </tr>
+                  </th:block>
+                  <th:block th:unless="${resultMap.list.size() > 0}">
+                    <tr>
+                      <td class="min-width text-center" colspan="8">
+                        <p>데이터가 존재하지 않습니다.</p>
+                      </td>
+                    </tr>
+                  </th:block>
+                  </tbody>
+                </table>
+              </div>
+              </form>
+              <div class="row">
+                <div class="col">
+                  <ul class="pagination">
+                    <li class="page-item"
+                        th:classappend="${index == (resultMap.page / resultMap.pageSize) + 1} ? active"
+                        th:each="index : ${#numbers.sequence(1, resultMap.totalPage)}">
+                      <a class="page-link"
+                         th:href="@{/notice/list(page=${resultMap.pageSize * (index - 1)}, pageSize=${resultMap.pageSize})}">
+                        <span th:text="${index}"></span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <script th:inline="javascript">
+    const frm = $("#frm");
+
+    $("input[name='idArrAll']").on("click", function(){
+      if ($(this).is(":checked")) {
+        $("input[name='idArr']").prop("checked", true);
+      } else {
+        $("input[name='idArr']").prop("checked", false);
+      }
+    });
+
+    function fnDelete() {
+      const idArrLen = $("input[name='idArr']:checked").length;
+
+      if (idArrLen > 0) {
+        if (confirm(msg.confirm.delete)) {
+          frm.attr("method", "post");
+          frm.attr("action", "/notice/delete");
+          frm.submit();
+        }
+      } else {
+        alert(msg.empty.delete);
+      }
+    }
+  </script>
+</th:block>
+</html>

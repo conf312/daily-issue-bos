@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:replace="fragments/header :: headerFragment"></th:block>
+<body>
+  <div class="div_load_image"
+       style="position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; z-index: 100; opacity: 0.5; background-color: rgb(0, 0, 0); ">
+    <img src="/images/loading.gif" style="width:100px; height:100px;position:absolute; top:50%; left:50%;">
+  </div>
+  <input type="hidden" id="globalFileSize" name="globalFileSize" th:value="${@environment.getProperty('global.file.max-size')}" />
+  <input type="hidden" id="globalFileExt" name="globalFileExt" th:value="${@environment.getProperty('global.file.ext')}" />
+  <aside class="sidebar-nav-wrapper">
+    <div class="navbar-logo">
+      <a href="/dashboard">
+        <img src="/images/logo/logo.svg" alt="logo" />
+      </a>
+    </div>
+    <nav class="sidebar-nav">
+      <ul>
+        <li class="nav-item /dashboard">
+          <a href="/dashboard">
+            <span class="icon">
+              <i class="lni lni-dashboard"></i>
+            </span>
+            <span class="text">대시보드</span>
+          </a>
+        </li>
+        <li class="nav-item /member/list /member/detail">
+          <a href="/member/list">
+            <span class="icon">
+              <i class="lni lni-mailchimp"></i>
+            </span>
+            <span class="text">관리자</span>
+          </a>
+        </li>
+        <li class="nav-item /time-board/list /time-board/write">
+          <a href="/time-board/list">
+            <span class="icon">
+              <i class="lni lni-timer"></i>
+            </span>
+            <span class="text">타임보드</span>
+          </a>
+        </li>
+        <li class="nav-item /board/list /board/write">
+          <a href="/board/list">
+            <span class="icon">
+              <i class="lni lni-list"></i>
+            </span>
+            <span class="text">게시판</span>
+          </a>
+        </li>
+        <li class="nav-item nav-item-has-children /notice/list /notice/write /faq/list /faq/write">
+          <a
+                  href="#0"
+                  class="collapsed"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#ddmenu_3"
+                  aria-controls="ddmenu_3"
+                  aria-expanded="false"
+                  aria-label="Toggle navigation"
+          >
+            <span class="icon">
+              <i class="lni lni-headphone"></i>
+            </span>
+            <span class="text">고객센터</span>
+          </a>
+          <ul id="ddmenu_3" class="collapse dropdown-nav">
+            <li>
+              <a href="/notice/list">공지사항</a>
+            </li>
+            <li>
+              <a href="/faq/list">FAQ</a>
+            </li>
+          </ul>
+        </li>
+        <span class="divider"><hr/></span>
+        <li class="nav-item /user/list">
+          <a href="javascript:alert('준비중입니다.')">
+            <span class="icon">
+              <i class="lni lni-users"></i>
+            </span>
+            <span class="text">사용자</span>
+          </a>
+        </li>
+        <li class="nav-item /inquiry/list /inquiry/detail">
+          <a href="/inquiry/list">
+            <span class="icon">
+              <i class="lni lni-pencil-alt"></i>
+            </span>
+            <span class="text">고객문의</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            href="https://analytics.google.com/analytics/web/provision/?hl=ko&pli=1#/provision"
+            target="_blank">
+            <span class="icon">
+              <i class="lni lni-google"></i>
+            </span>
+            <span class="text">구글 애널리틱스</span>
+          </a>
+        </li>
+        <span class="divider"><hr/></span>
+        <li class="nav-item active">
+          <a href="/message/list">
+              <span class="icon">
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9.16667 19.25H12.8333C12.8333 20.2584 12.0083 21.0834 11 21.0834C9.99167 21.0834 9.16667 20.2584 9.16667 19.25ZM19.25 17.4167V18.3334H2.75V17.4167L4.58333 15.5834V10.0834C4.58333 7.24171 6.41667 4.76671 9.16667 3.94171V3.66671C9.16667 2.65837 9.99167 1.83337 11 1.83337C12.0083 1.83337 12.8333 2.65837 12.8333 3.66671V3.94171C15.5833 4.76671 17.4167 7.24171 17.4167 10.0834V15.5834L19.25 17.4167ZM15.5833 10.0834C15.5833 7.51671 13.5667 5.50004 11 5.50004C8.43333 5.50004 6.41667 7.51671 6.41667 10.0834V16.5H15.5833V10.0834Z"></path>
+                </svg>
+              </span>
+            <span class="text">메시지</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <div class="promo-box">
+      <h3>사용자 사이트</h3>
+      <p>아래 버튼을 누르면 바로 사용자 페이지로 이동합니다.</p>
+      <a
+        href="javascript:alert('준비중입니다.')"
+        rel="nofollow"
+        class="main-btn primary-btn btn-hover">
+        이동하기
+      </a>
+    </div>
+  </aside>
+  <div class="overlay"></div>
+  <main class="main-wrapper">
+    <header class="header">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-lg-5 col-md-5 col-6">
+              <div class="header-left d-flex align-items-center">
+                  <div class="menu-toggle-btn mr-20">
+                      <button
+                        id="menu-toggle"
+                        class="main-btn primary-btn btn-hover"
+                      >
+                        <i class="lni lni-chevron-left me-2"></i> Menu
+                      </button>
+                  </div>
+              </div>
+          </div>
+          <div class="col-lg-7 col-md-7 col-6">
+            <div class="header-right">
+              <div class="notification-box ml-15 d-none d-md-flex">
+                <button class="dropdown-toggle" type="button" id="notification" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="lni lni-alarm"></i>
+                  <span th:text="${session.messageTop5.list.size()}"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notification" style="">
+                  <th:block th:if="${session.messageTop5.list.size() > 0}">
+                    <li th:each="list: ${session.messageTop5.list}">
+                      <a href="/message/list" th:onclick="fnRead(this, [[${list.id}]])">
+                        <div class="image" th:if="${list.fileId != null}">
+                          <img th:src="@{/file/download(id=${list.fileId})}" alt="profile" style="height:40px;">
+                        </div>
+                        <div class="image" th:if="${list.fileId == null}">
+                          <img src="/images/profile/person.png" alt="profile" style="height:40px;">
+                        </div>
+                        <div class="content">
+                          <h6>
+                            <span th:text="${list.registerName}"></span>
+                            <span class="text-regular">
+                              comment on a product.
+                            </span>
+                          </h6>
+                          <p th:text="${list.contents}"></p>
+                          <span>보낸시간:</span>
+                          <span th:text="${list.registerTime}"></span>
+                        </div>
+                      </a>
+                    </li>
+                  </th:block>
+                  <th:block th:unless="${session.messageTop5.list.size() > 0}">
+                    <li>
+                      <a href="/message/list">
+                        <div class="content">
+                          <h6>도착한 메시지가 없습니다.</h6>
+                        </div>
+                      </a>
+                    </li>
+                  </th:block>
+                </ul>
+              </div>
+              <div class="profile-box ml-15">
+                <button
+                  class="dropdown-toggle bg-transparent border-0"
+                  type="button"
+                  id="profile"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <div class="profile-info">
+                    <div class="info">
+                      <h6 th:text="${session.member.name}"></h6>
+                      <div class="image">
+                        <th:block th:if="${session.member.fileId != null}">
+                          <img th:src="@{/file/download(id=${session.member.fileId})}" alt="profile" style="height:40px;"/>
+                        </th:block>
+                        <th:block th:unless="${session.member.fileId != null}">
+                          <img src="/images/profile/person.png" alt="profile" style="height:40px;"/>
+                        </th:block>
+                        <span class="status"></span>
+                      </div>
+                    </div>
+                  </div>
+                  <i class="lni lni-chevron-down"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profile">
+                  <li>
+                    <a href="/member/profile">
+                      <i class="lni lni-user"></i> 프로필
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/member/logout"> <i class="lni lni-exit"></i> 로그아웃 </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script th:inline="javascript">
+        function fnRead(obj, id) {
+          let data = {
+            [[${_csrf.parameterName}]]: [[${_csrf.token}]],
+            id: id,
+            readYn: "Y"
+          };
+          script.ajax("/message/update/read-yn", "post", false, "json", data, function(r) {
+          });
+        }
+      </script>
+    </header>
+    <!------------ CONTENT ------------>
+    <th:block layout:fragment="content"></th:block>
+    <!------------ CONTENT ------------>
+  </main>
+  <th:block th:replace="fragments/footer :: footerFragment"></th:block>
+</body>
+</html>

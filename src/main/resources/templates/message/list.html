@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/default_layout}">
+<th:block layout:fragment="content">
+  <div class="notification-wrapper">
+    <div class="container-fluid">
+      <div class="title-wrapper pt-30">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <div class="title mb-30">
+              <h2 class="ft-gm">메시지 목록</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-style">
+        <th:block th:if="${resultMap.list.size() > 0}">
+          <div class="single-notification" th:classappend="${list.readYn == 'Y'} ? readed" th:each="list: ${resultMap.list}">
+            <div class="checkbox">
+              <div class="form-check checkbox-style mb-20">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  value=""
+                  id="checkbox-1"
+                />
+              </div>
+            </div>
+            <div class="notification">
+              <div class="image" th:if="${list.fileId != null}">
+                <img th:src="@{/file/download(id=${list.fileId})}" alt="profile" style="height:50px;"/>
+              </div>
+              <div class="image" th:if="${list.fileId == null}">
+                <img src="/images/profile/person.png" alt="profile">
+              </div>
+              <a href="#0" class="content">
+                <h6 th:text="${list.registerName}"></h6>
+                <p class="text-sm text-gray" th:text="${list.contents}"></p>
+                <span class="text-sm text-medium text-gray">보낸시간: </span>
+                <span class="text-sm text-medium text-gray" th:text="${list.registerTime}"></span>
+              </a>
+            </div>
+            <div class="action">
+              <button class="delete-btn" th:onclick="fnDelete(this, [[${list.id}]]);">
+                <i class="lni lni-trash-can"></i>
+              </button>
+              <button
+                class="more-btn dropdown-toggle"
+                id="moreAction"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i class="lni lni-more-alt"></i>
+              </button>
+              <ul
+                class="dropdown-menu dropdown-menu-end"
+                aria-labelledby="moreAction"
+              >
+                <li class="dropdown-item" th:if="${list.readYn eq 'N'}" >
+                  <a href="#0" th:onclick="javascript:fnRead(this, [[${list.id}]]);" class="text-gray">읽음표시</a>
+                </li>
+                <li class="dropdown-item">
+                  <a
+                    href="#0"
+                    th:onclick="fnSendMessage([[${list.registerId}]], [[${list.registerName}]])"
+                    class="text-gray"
+                    data-bs-toggle="modal"
+                    data-bs-target="#exampleModal">답장</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </th:block>
+        <th:block th:unless="${resultMap.list.size() > 0}">
+          <h6>도착한 메시지가 없습니다.</h6>
+        </th:block>
+      </div>
+    </div>
+  </div>
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="frmMessage" action="/message/save" method="post">
+          <input type="hidden" id="toMemberId" name="toMemberId">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel">쪽지보내기</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <textarea class="form-control" id="contents" name="contents" rows="6" required></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnClose">취소</button>
+            <button type="button" class="btn btn-primary" onclick="fnSendMessage()">전송</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script th:inline="javascript">
+    function fnRead(obj, id) {
+      let data = {
+        [[${_csrf.parameterName}]]: [[${_csrf.token}]],
+        id: id,
+        readYn: "Y"
+      };
+      script.ajax("/message/update/read-yn", "post", false, "json", data, function(r) {
+        if (r.result > 0) {
+          $(obj).parents(".single-notification").addClass("readed");
+          $(obj).parents(".dropdown-item").hide();
+          alert(msg.modify);
+        }
+      });
+    }
+
+    function fnSendMessage(id, name) {
+      $("#modalLabel").text(name+"님에게 쪽지보내기");
+      if (id) {
+        $("#toMemberId").val(id);
+      } else {
+        script.ajax("/message/save", "post", false, "json", $("#frmMessage").serialize(), function(r) {
+          if (r.result > 0) {
+            alert(msg.register);
+            $("#contents").val("");
+            $("#btnClose").click();
+          }
+        });
+      }
+    }
+
+    function fnDelete(obj, id) {
+      if (confirm(msg.confirm.delete)) {
+        let data = {
+          [[${_csrf.parameterName}]]: [[${_csrf.token}]],
+          id: id,
+          useYn: "N"
+        };
+        script.ajax("/message/update/use-yn", "post", false, "json", data, function(r) {
+          if (r.result > 0) {
+            alert(msg.delete);
+            $(obj).parents(".single-notification").hide();
+          }
+        });
+      }
+    }
+  </script>
+</th:block>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/default_layout}">
+<th:block layout:fragment="content">
+  <section class="table-components">
+    <div class="container-fluid">
+      <div class="title-wrapper pt-30">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <div class="title mb-30">
+              <h2 class="ft-gm" th:if="${info != null}">타임보드 상세</h2>
+              <h2 class="ft-gm" th:unless="${info != null}">타임보드 등록</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-elements-wrapper">
+        <form id="frmWrite" action="/time-board/save" method="post" enctype="multipart/form-data">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <input type="hidden" th:name="id" th:value="${info.id}" th:if="${info != null}"/>
+          <input type="hidden" th:name="idArr" th:value="${info.id}" th:if="${info != null}"/>
+          <div class="col-lg-12">
+            <div class="card-style mb-30">
+              <h4 class="mb-25 ft-gm">등록정보</h4>
+              <div class="row">
+                <div class="col-lg-6">
+                  <label class="text-dark ft-gm"><span class="text-danger">*</span>시작일자</label>
+                  <div class="input-style-1">
+                    <input type="date" name="startDate" th:if="${info == null}" required>
+                    <input type="date" name="startDate" th:unless="${info == null}" th:value="${info.startDate}" required>
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <label class="text-dark ft-gm"><span class="text-danger">*</span>종료일자</label>
+                  <div class="input-style-1">
+                    <input type="date" name="endDate" th:if="${info == null}" required>
+                    <input type="date" name="endDate" th:unless="${info == null}" th:value="${info.endDate}" required>
+                  </div>
+                </div>
+              </div>
+              <label class="text-dark ft-gm"><span class="text-danger">*</span>제목</label>
+              <div class="input-style-3 mt-1">
+                <input type="text" name="title" maxlength="50" th:if="${info == null}" required/>
+                <input type="text" name="title" maxlength="50" th:unless="${info == null}" th:value="${info.title}" required/>
+                <span class="icon"> <i class="lni lni-comments"></i> </span>
+              </div>
+              <label class="text-dark ft-gm"><span class="text-danger">*</span>내용</label>
+              <div class="input-style-3 mt-1">
+                <textarea rows="7" name="contents" th:if="${info == null}" required></textarea>
+                <textarea rows="7" name="contents" th:unless="${info == null}" th:text="${info.contents}" required></textarea>
+                <span class="icon"><i class="lni lni-text-format"></i></span>
+              </div>
+              <div class="row">
+                <div class="col-lg-12">
+                  <label class="text-dark ft-gm"><span class="text-danger">*</span>타임보드 이미지</label>&nbsp;
+                  <div class="input-style-3 mt-3">
+                    <input type="file" id="pcFile" name="pcFile" onchange="fnChangeFile(this, 'pcPreview')" />
+                    <span class="icon"> <i class="lni lni-cloud-upload"></i> </span>
+                  </div>
+                  <img src="" height="200" alt="이미지 미리보기" id="pcPreview" style="display:none;" th:if="${info == null}" />
+                  <th:block th:unless="${info == null}">
+                    <input type="hidden" id="fileId" name="fileId" th:value="${info.fileId}" />
+                    <img th:src="@{/file/download(id=${info.fileId})}" height="200" alt="이미지 미리보기" id="pcPreview" />
+                  </th:block>
+                </div>
+              </div>
+              <div class="row mt-3">
+                <div class="col-lg-3">
+                  <label class="text-dark ft-gm"><span class="text-danger">*</span>항시 노출여부</label>
+                  <div class="form-check form-switch toggle-switch mt-1">
+                    <input class="form-check-input" type="checkbox" name="alwaysYn" value="Y" th:if="${info == null}">
+                    <input class="form-check-input" type="checkbox" name="alwaysYn" value="Y" th:unless="${info == null}" th:checked="${info.alwaysYn eq 'Y'}">
+                    <label class="form-check-label">미노출 / 노출</label>
+                  </div>
+                </div>
+                <div class="col-lg-3">
+                  <label class="text-dark ft-gm"><span class="text-danger">*</span>사용여부</label>
+                  <div class="form-check form-switch toggle-switch mt-1">
+                    <input class="form-check-input" type="checkbox" name="useYn" value="Y" th:if="${info == null}">
+                    <input class="form-check-input" type="checkbox" name="useYn" value="Y" th:unless="${info == null}" th:checked="${info.useYn eq 'Y'}">
+                    <label class="form-check-label">미사용 / 사용</label>
+                  </div>
+                </div>
+              </div>
+              <th:block th:if="${info != null}">
+                <br/><hr/><br/>
+                <div class="row">
+                  <div class="col-lg-6">
+                    <label class="text-dark ft-gm">등록자</label>
+                    <div class="input-style-3">
+                      <input type="text" th:value="${info.registerName}" disabled/>
+                      <span class="icon"> <i class="lni lni-laptop-phone"></i> </span>
+                    </div>
+                  </div>
+                  <div class="col-lg-6">
+                    <label class="text-dark ft-gm">등록일시</label>
+                    <div class="input-style-3">
+                      <input type="text" th:value="${info.registerTime}" disabled/>
+                      <span class="icon"> <i class="lni lni-timer"></i> </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-6">
+                    <label class="text-dark ft-gm">변경자</label>
+                    <div class="input-style-3">
+                      <input type="text" th:value="${info.modifyName}" disabled/>
+                      <span class="icon"> <i class="lni lni-laptop-phone"></i> </span>
+                    </div>
+                  </div>
+                  <div class="col-lg-6">
+                    <label class="text-dark ft-gm">변경일시</label>
+                    <div class="input-style-3">
+                      <input type="text" th:value="${info.modifyTime}" disabled/>
+                      <span class="icon"> <i class="lni lni-timer"></i> </span>
+                    </div>
+                  </div>
+                </div>
+              </th:block>
+            </div>
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="float-start">
+                  <a href="/time-board/list" class="main-btn success-btn rounded-md btn-hover fw-bold">
+                    <i class="lni lni-list"></i> 목록
+                  </a>
+                </div>
+                <div class="float-end">
+                  <Button type="submit" class="main-btn secondary-btn rounded-md btn-hover fw-bold">
+                    <i class="lni lni-pencil-alt"></i>
+                    <span th:if="${info == null}">등록</span>
+                    <span th:unless="${info == null}">수정</span>
+                  </Button>
+                  <a href="javascript:fnDelete();" class="main-btn danger-btn rounded-md btn-hover fw-bold" th:if="${info != null}">
+                    <i class="lni lni-trash-can"></i> 삭제
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+  <script th:inline="javascript">
+    const frm = $("#frmWrite");
+    const info = [[${info}]];
+    let deleteFlag = false;
+
+    function fnChangeFile(obj, previewId) {
+      fileUtil.change(obj, previewId);
+    }
+
+    function fnDelete() {
+      if (confirm(msg.confirm.delete)) {
+        deleteFlag = true;
+        frm.attr("action", "/time-board/delete");
+        frm.submit();
+      }
+    }
+
+    function fnDeleteFile(obj, id) {
+      if(confirm(msg.confirm.deleteFile)) {
+        let data = {
+          [[${_csrf.parameterName}]]: [[${_csrf.token}]],
+          id: id,
+          useYn: "N"
+        }
+        script.ajax("/file/update-use", "post", false, "json", data, function(r) {
+          if (r.result > 0) {
+            if (fileListSize == 3) {
+              attachFileDiv.show();
+            }
+            $(obj).parent("div").remove();
+            alert(msg.delete);
+          }
+        });
+      }
+    }
+
+    frm.submit(function() {
+      if (info == null) {
+        if ($("#pcFile").val() == "") {
+          alert(msg.file.not.register);
+          return false;
+        }
+      }
+      if (deleteFlag) {
+        return true;
+      }
+      if (info) {
+        if (confirm(msg.confirm.modify)) {
+          frm.attr("action", "/time-board/update");
+          return true;
+        }
+      } else {
+        if (confirm(msg.confirm.register)) {
+          return true;
+        }
+      }
+      return false;
+    });
+  </script>
+</th:block>
+</html>
