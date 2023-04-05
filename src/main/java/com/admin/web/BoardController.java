@@ -7,16 +7,18 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 @RequiredArgsConstructor
+@RequestMapping("/board")
 @Controller
 public class BoardController {
 
     private final BoardService boardService;
 
-    @PostMapping("/board-save")
+    @PostMapping("/save")
     public String saveMember(Model model, Board.Request request, MultipartHttpServletRequest multiRequest) throws Exception {
         String msg = "Failed. Please try later.";
 
@@ -31,7 +33,7 @@ public class BoardController {
         return "error/blank";
     }
 
-    @GetMapping("/board-list")
+    @GetMapping("/list")
     public String getBoardListPage(Model model,
                                    Board.Request request,
                                    @RequestParam(required = false, defaultValue = "0") Integer page,
@@ -40,7 +42,7 @@ public class BoardController {
         return "board/list";
     }
 
-    @PostMapping("/board-update")
+    @PostMapping("/update")
     public String updateBoard(Model model, Board.Request request, MultipartHttpServletRequest multiRequest) throws Exception {
         String msg = "Failed. Please try later.";
 
@@ -55,13 +57,13 @@ public class BoardController {
         return "error/blank";
     }
 
-    @GetMapping("/board-detail")
+    @GetMapping("/etail")
     public String getBoardDetailPage(Model model, @RequestParam(required = false, defaultValue = "0") Long id) throws Exception {
         if (id != 0) model.addAttribute("resultMap", boardService.findById(id));
         return "board/detail";
     }
 
-    @PostMapping("/board-delete")
+    @PostMapping("/delete")
     public String deleteBoard(Model model, Board.Request request) throws Exception {
 
         String msg = "Failed. Please try later.";
